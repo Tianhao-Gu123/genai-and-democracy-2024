@@ -1,55 +1,69 @@
-# This file will be executed when a user wants to query your project.
+import os
+import warnings
+
+print("B🅱️e🇪s🇸t🇹 Seminar ever 🎉📚🎓🌟😊👍🔥💡🚀")
+print("--------------------")
+print("🔧 Setting up environment of user_inference...")
+# Suppress TensorFlow warnings
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # This will hide the TensorFlow info and warning messages
+warnings.filterwarnings('ignore', category=FutureWarning)  # This will ignore FutureWarnings
+# Suppress specific warning from Hugging Face's transformers
+def warn(*args, **kwargs):
+    pass
+warnings.warn = warn
+
 import argparse
-from os.path import join
 import json
+from os.path import join
+from sentence_transformers import SentenceTransformer, util
+from user_preprocess import process_files
 
-# TODO Implement the inference logic here
-def handle_user_query(query, query_id, output_path):
-    result = {
-        "generated_queries": [ "sports", "soccer", "Munich vs Dortmund" ],
-        "detected_language": "de",
-    }
-    
-    with open(join(output_path, f"{query_id}.json"), "w") as f:
-        json.dump(result, f)
+# Initialize the model
+model = SentenceTransformer("sentence-transformers/msmarco-distilbert-base-tas-b")
+print("🧠 Model loaded successfully.")
 
+# Load the JSON files from the specified directory
+def load_and_process_json_files(directory_path):
+    print("📂 Loading and processing JSON files...")
+    docs = []
+    text_ids = []
+    for filename in os.listdir(directory_path):
+        if filename.endswith('.json'):
+            file_path = join(directory_path, filename)
+            with open(file_path, 'r') as file:
+                data = json.load(file)
+                for content in data['content']:
+                    docs.append(content)
+                    text_ids.append(data['text_id'])  # Store the text_id alongside the content
+    print("✅ JSON files processed.")
+    return docs, text_ids
 
-# TODO OPTIONAL
-# This function is optional for you
-# You can use it to interfer with the default ranking of your system.
-#
-# If you do embeddings, this function will simply compute the cosine-similarity
-# and return the ordering and scores
-def rank_articles(generated_queries, article_representations):
-    """
-    This function takes as arguments the generated / augmented user query, as well as the
-    transformed article representations.
-    
-    It needs to return a list of shape (M, 2), where M <= #article_representations.
-    Each tuple contains [index, score], where index is the index in the article_repr array.
-    The list need already be ordered by score. Higher is better, between 0 and 1.
-    
-    An empty return list indicates no matches.
-    """
-    result = []
-    print(json.dumps(generated_queries))
+# Implement the inference logic here
+def handle_user_query(query, query_de):
+    print("🔍 Handling user query...")
+    # TODO by Ayoub: use some API to get some results for the query and store them in the search_result directory in JSON format
+    # TODO: Call user_preprocessing.py to preprocess the search results
+    process_files()
+    docs, text_ids = load_and_process_json_files("./Cache/preprocessed_search_result")
+    query_emb = model.encode(query)
+    doc_emb = model.encode(docs)
+    scores = util.dot_score(query_emb, doc_emb)[0].cpu().tolist()
+    doc_info = list(zip(docs, scores, text_ids))
+    sorted_doc_info = sorted(doc_info, key=lambda x: x[1], reverse=True)
+    top_results = sorted_doc_info[:3]
+    print(f"🎉 Great! We have found some results for you! And the higher the score, the more relevant the text is.")
+    for doc, score, text_id in top_results:
+        print(f"📄 Score: {score}, Doc: {doc}")
+    # TODO: Store the results in a JSON file in the res_history directory
+    # TODO: Clear the search_result directory after the query is processed
+    # TODO: Add source for the results, for example, Wikipedia, StackOverflow, etc.
 
-
-
-# This is a sample argparse-setup, you probably want to use in your project:
 parser = argparse.ArgumentParser(description='Run the inference.')
 parser.add_argument('--query', type=str, help='The user query.', required=True, action="append")
-parser.add_argument('--query_id', type=str, help='The IDs for the queries, in the same order as the queries.', required=True, action="append")
-parser.add_argument('--output', type=str, help='Path to the output directory.', required=True)
+parser.add_argument('--query_de', type=str, help='query_de', required=True, action="append")
 
 if __name__ == "__main__":
     args = parser.parse_args()
-    queries = args.query
-    query_ids = args.query_id
-    output = args.output
-    
-    assert len(queries) == len(query_ids), "The number of queries and query IDs must be the same."
-    
-    for query, query_id in zip(queries, query_ids):
-        handle_user_query(query, query_id, output)
-    
+    query = args.query
+    query_de = args.query_de
+    handle_user_query(query, query_de)
