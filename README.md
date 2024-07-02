@@ -37,6 +37,7 @@ This project is a collaborative effort by participants of the GenerativeAI and D
 EXAMPLE
 ' Prerequisites
 ' Make sure you have Docker installed on your machine. If not, you can download and install it from Docker's official website: https://www.docker.com/
+(https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-20-04)
 
 ' Building and Running the Docker Container
 
