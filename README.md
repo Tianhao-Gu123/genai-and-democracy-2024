@@ -39,10 +39,8 @@ EXAMPLE
 ' Make sure you have Docker installed on your machine. If not, you can download and install it from Docker's official website: https://www.docker.com/
 (https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-20-04)
 
-' Building and Running the Docker Container
-
 ' Build the Docker Image:
-shell("docker build -t googl2 .")
+shell("sudo docker build -t googl2 .")
 
 ' Run the Docker Container:
 shell("docker run -p 4000:80 googl2")
