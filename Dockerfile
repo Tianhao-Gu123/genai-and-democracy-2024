@@ -14,7 +14,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 EXPOSE 80
 
 # Define environment variable
-ENV NAME World
+ENV NAME=World
 
 # Keep the container running without immediately running app.py
 CMD ["tail", "-f", "/dev/null"]

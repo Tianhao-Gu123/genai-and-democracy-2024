@@ -12,21 +12,56 @@ from transformers import AutoTokenizer, AutoModelForSeq2SeqLM, pipeline
 print("📚 Transformers libraries imported successfully.")
 
 # Function to translate German to English
-def translate_de_to_en(sentence):
+from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
+from nltk.tokenize import sent_tokenize
+
+def translate_de_to_en(text):
     print("🇩🇪 Translating from German to English...")
+    # Load tokenizer and model
     tokenizer = AutoTokenizer.from_pretrained("google/bert2bert_L-24_wmt_de_en", pad_token="<pad>", eos_token="</s>", bos_token="<s>")
     model = AutoModelForSeq2SeqLM.from_pretrained("google/bert2bert_L-24_wmt_de_en")
-    input_ids = tokenizer(sentence, return_tensors="pt", add_special_tokens=False).input_ids
-    output_ids = model.generate(input_ids)[0]
-    translated_sentence = tokenizer.decode(output_ids, skip_special_tokens=True)
-    return translated_sentence
+
+    # Split the text into sentences to ensure each block is within the size limit
+    sentences = sent_tokenize(text, language='german')
+    translated_text = ""
+
+    for sentence in sentences:
+        # Tokenize sentence to check if it needs further splitting
+        input_ids = tokenizer(sentence, return_tensors="pt", add_special_tokens=True).input_ids
+        # If the sentence is too long, further splitting logic should be implemented here
+        if len(input_ids[0]) > 512:
+            print("⚠️ This sentence too long, further splitting required.")
+            # Implement further splitting if necessary
+            pass
+        else:
+            # Translate the sentence/block
+            print(f"Translating: {sentence}")
+            output_ids = model.generate(input_ids)[0]
+            translated_sentence = tokenizer.decode(output_ids, skip_special_tokens=True)
+            translated_text += translated_sentence + " "
+
+    return translated_text.strip()
 
 # Function to translate French to English
-def translate_fr_to_en(sentence):
+from transformers import pipeline
+from nltk.tokenize import sent_tokenize
+
+def translate_fr_to_en(text):
     print("🇫🇷 Translating from French to English...")
+    # Initialize the translation pipeline
     pipe = pipeline("translation", model="Helsinki-NLP/opus-mt-tc-big-fr-en")
-    result = pipe(sentence)
-    return result[0]['translation_text']
+    
+    # Split the text into sentences
+    sentences = sent_tokenize(text, language='french')
+    translated_text = ""
+    
+    for sentence in sentences:
+        # Translate each sentence and concatenate
+        print(f"Translating: {sentence}")
+        result = pipe(sentence)
+        translated_text += result[0]['translation_text'] + " "
+    
+    return translated_text.strip()
 
 # Function to handle each input file
 def handle_input_file(file_location, output_path):

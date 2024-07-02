@@ -17,6 +17,7 @@ import json
 from os.path import join
 from sentence_transformers import SentenceTransformer, util
 from user_preprocess import process_files
+from retrieve_data import retrieve_data
 
 # Initialize the model
 model = SentenceTransformer("sentence-transformers/msmarco-distilbert-base-tas-b")
@@ -42,6 +43,11 @@ def load_and_process_json_files(directory_path):
 def handle_user_query(query, query_de):
     print("🔍 Handling user query...")
     # TODO by Ayoub: use some API to get some results for the query and store them in the search_result directory in JSON format
+    
+    #transform the query to a string
+    query = " ".join(query)
+    retrieve_data(query)
+
     # TODO: Call user_preprocessing.py to preprocess the search results
     process_files()
     docs, text_ids = load_and_process_json_files("./Cache/preprocessed_search_result")
@@ -55,7 +61,6 @@ def handle_user_query(query, query_de):
     for doc, score, text_id in top_results:
         print(f"📄 Score: {score}, Doc: {doc}")
     # TODO: Store the results in a JSON file in the res_history directory
-    # TODO: Clear the search_result directory after the query is processed
     # TODO: Add source for the results, for example, Wikipedia, StackOverflow, etc.
 
 parser = argparse.ArgumentParser(description='Run the inference.')

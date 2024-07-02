@@ -1,4 +1,11 @@
-:) Great! We have found some results for you! And the higher the score, the more relevant the text is.
-Score: 85.20101165771484, Doc: Once upon a time, there was a little baby
-Score: 82.31267547607422, Doc: Around 9 Million people live in London
-Score: 80.92306518554688, Doc: London is my country
+:) Great! 🎉 We have found some results for you! And the higher the score, the more relevant the text is😊.
+Score: 99.31267547607422, Doc: Around 9 Million people live in London
+Score: 78.92306518554688, Doc: London is my country
+Score: 45.20101165771484, Doc: Once upon a time, there was a little baby
+
+
+
+
+
+
+
