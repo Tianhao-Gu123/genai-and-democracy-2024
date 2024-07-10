@@ -17,7 +17,7 @@ def retrieve_data(query):
     }
 
     # Define the maximum number of articles to fetch per language
-    max_articles = 1
+    max_articles = 4
 
     # Clean the search_result directory
     output_dir = './Cache/search_result'
@@ -56,7 +56,8 @@ def retrieve_data(query):
                 article_data = {
                     "language": lang_code,
                     "text_id": str(idx),
-                    "content": [newspaper_article.text],
+                    "content": [' '.join(newspaper_article.text.split()[:50])],
+                    "url": url,
                 }
                 
                 # Define the file path for the JSON file

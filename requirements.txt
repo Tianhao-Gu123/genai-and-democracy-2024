@@ -7,3 +7,4 @@ sentencepiece
 gnews
 newspaper3k
 lxml[html_clean]
+nltk
