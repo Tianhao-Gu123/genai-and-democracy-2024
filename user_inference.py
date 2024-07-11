@@ -18,7 +18,9 @@ from os.path import join
 from sentence_transformers import SentenceTransformer, util
 from user_preprocess import process_files
 from retrieve_data import retrieve_data
-from bias_de import query_bias_detection
+import requests
+import time
+
 
 # Initialize the model
 model = SentenceTransformer("sentence-transformers/msmarco-distilbert-base-tas-b")
@@ -40,6 +42,26 @@ def load_and_process_json_files(directory_path):
                     urls.append(data['url'])  # Assuming each JSON file contains a 'url' key
     print("✅ JSON files processed.")
     return docs, text_ids, urls  # Return the urls list along with docs and text_ids
+
+def query_bias_detection(input_text, max_retries=5, wait_time=20):
+    API_URL = "https://api-inference.huggingface.co/models/d4data/bias-detection-model"
+    headers = {"Authorization": "Bearer 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"}
+
+    def query(payload):
+        response = requests.post(API_URL, headers=headers, json=payload)
+        return response.json()
+
+    retries = 0
+    while retries < max_retries:
+        output = query({"inputs": input_text})
+        # Check if the response contains an error indicating the model is loading
+        if isinstance(output, dict) and output.get('error') == 'Model d4data/bias-detection-model is currently loading':
+            print(f"Model is loading, retrying in {wait_time} seconds...")
+            time.sleep(wait_time)  # Wait before retrying
+            retries += 1
+            continue
+        return output  # Return the output if no loading error or other errors
+    return {"error": "Max retries reached, could not process the input."}
 
 def get_top_three_non_biased_docs(top_results):
     non_biased_scores = []
