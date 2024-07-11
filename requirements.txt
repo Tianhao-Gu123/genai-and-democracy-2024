@@ -8,4 +8,4 @@ gnews
 newspaper3k
 lxml[html_clean]
 nltk
-bias_detection
+requests
