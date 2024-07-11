@@ -18,7 +18,7 @@ from os.path import join
 from sentence_transformers import SentenceTransformer, util
 from user_preprocess import process_files
 from retrieve_data import retrieve_data
-from bias import query_bias_detection
+from bias_detection import query_bias_detection
 
 # Initialize the model
 model = SentenceTransformer("sentence-transformers/msmarco-distilbert-base-tas-b")
@@ -77,7 +77,7 @@ def handle_user_query(query):
     scores = util.dot_score(query_emb, doc_emb)[0].cpu().tolist()
     doc_info = list(zip(docs, scores, text_ids, urls))
     sorted_doc_info = sorted(doc_info, key=lambda x: x[1], reverse=True)
-    top_results = sorted_doc_info[:9]
+    top_results = sorted_doc_info[:4]
     print(f"🎉 Great! We have found the best result for you!")
     get_top_three_non_biased_docs(top_results)
 
