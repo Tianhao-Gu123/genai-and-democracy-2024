@@ -61,16 +61,16 @@ def get_top_three_non_biased_docs(top_results):
     
     for doc, score, id, url in top_three_non_biased_docs:  # Unpack id and url along with doc and score
         print(f"Document: {doc}\nNon-biased Score: {score}\nFor the full text, visit: {url}\n")
-        
+
 # Implement the inference logic here
 def handle_user_query(query):
     print("🔍 Handling user query...")
     #transform the query to a string
     query = " ".join(query)
-    #retrieve_data(query)
-
+    retrieve_data(query)
     #call user_preprocessing.py to preprocess the search results
-    #process_files()
+    process_files()
+
     docs, text_ids, urls = load_and_process_json_files("./Cache/preprocessed_search_result")
     query_emb = model.encode(query)
     doc_emb = model.encode(docs)
