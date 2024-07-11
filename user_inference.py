@@ -24,25 +24,26 @@ from bias import query_bias_detection
 model = SentenceTransformer("sentence-transformers/msmarco-distilbert-base-tas-b")
 print("🧠 Model loaded successfully.")
 
-# Load the JSON files from the specified directory
 def load_and_process_json_files(directory_path):
     print("📂 Loading and processing JSON files...")
     docs = []
     text_ids = []
+    urls = []  # Initialize a list to store URLs
     for filename in os.listdir(directory_path):
         if filename.endswith('.json'):
-            file_path = join(directory_path, filename)
+            file_path = os.path.join(directory_path, filename)  # Ensure os.path.join is used for file path
             with open(file_path, 'r') as file:
                 data = json.load(file)
                 for content in data['content']:
                     docs.append(content)
                     text_ids.append(data['text_id'])  # Store the text_id alongside the content
+                    urls.append(data['url'])  # Assuming each JSON file contains a 'url' key
     print("✅ JSON files processed.")
-    return docs, text_ids
+    return docs, text_ids, urls  # Return the urls list along with docs and text_ids
 
-def get_top_two_non_biased_docs(top_results):
+def get_top_three_non_biased_docs(top_results):
     non_biased_scores = []
-    for doc, _, _ in top_results:
+    for doc, sc, id, url in top_results:
         bias_detection_result = query_bias_detection(doc)
         if isinstance(bias_detection_result, dict) and 'error' in bias_detection_result:
             print("An error occurred while evaluating the bias.")
@@ -53,32 +54,32 @@ def get_top_two_non_biased_docs(top_results):
         else:
             first_result_list = bias_detection_result[0]
             non_biased_score = next((item for item in first_result_list if item['label'] == 'Non-biased'), None)['score']
-            non_biased_scores.append((doc, non_biased_score))
+            non_biased_scores.append((doc, non_biased_score, id, url))  # Include id and url in the tuple
     
     non_biased_scores.sort(key=lambda x: x[1], reverse=True)
     top_three_non_biased_docs = non_biased_scores[:3]
     
-    for doc, score in top_three_non_biased_docs:
-        print(f"Document: {doc}\nNon-biased Score: {score}\n")
-
+    for doc, score, id, url in top_three_non_biased_docs:  # Unpack id and url along with doc and score
+        print(f"Document: {doc}\nNon-biased Score: {score}\nFor the full text, visit: {url}\n")
+        
 # Implement the inference logic here
 def handle_user_query(query):
     print("🔍 Handling user query...")
     #transform the query to a string
     query = " ".join(query)
-    retrieve_data(query)
+    #retrieve_data(query)
 
     #call user_preprocessing.py to preprocess the search results
-    process_files()
-    docs, text_ids = load_and_process_json_files("./Cache/preprocessed_search_result")
+    #process_files()
+    docs, text_ids, urls = load_and_process_json_files("./Cache/preprocessed_search_result")
     query_emb = model.encode(query)
     doc_emb = model.encode(docs)
     scores = util.dot_score(query_emb, doc_emb)[0].cpu().tolist()
-    doc_info = list(zip(docs, scores, text_ids))
+    doc_info = list(zip(docs, scores, text_ids, urls))
     sorted_doc_info = sorted(doc_info, key=lambda x: x[1], reverse=True)
     top_results = sorted_doc_info[:9]
     print(f"🎉 Great! We have found the best result for you!")
-    get_top_two_non_biased_docs(top_results)
+    get_top_three_non_biased_docs(top_results)
 
     #print(f"🎉 Great! We have found the best result for you!")
     #print(f"Most non-biased document: {most_non_biased_doc}")

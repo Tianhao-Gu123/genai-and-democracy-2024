@@ -81,7 +81,9 @@ def handle_input_file(file_location, output_path):
 
     transformed_data = {
         "text_id": data['text_id'],
-        "content": translated_content
+        "content": translated_content,
+        "url": data['url']  # Assuming article_url contains the URL string
+
     }
     
     filename = os.path.basename(file_location)
