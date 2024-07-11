@@ -18,7 +18,7 @@ from os.path import join
 from sentence_transformers import SentenceTransformer, util
 from user_preprocess import process_files
 from retrieve_data import retrieve_data
-from bias_detection import query_bias_detection
+from bias_de import query_bias_detection
 
 # Initialize the model
 model = SentenceTransformer("sentence-transformers/msmarco-distilbert-base-tas-b")
